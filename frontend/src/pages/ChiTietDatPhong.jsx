@@ -9,16 +9,17 @@ export default function ChiTietDatPhong() {
   const { user } = useUI();
 
   const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(id && user));
   const [statusConfigs, setStatusConfigs] = useState([]);
 
   useEffect(() => {
     if (!id || !user) {
-      setLoading(false);
       return;
     }
 
+    let isMounted = true;
     const fetchBookingAndStatuses = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("token");
 
@@ -51,11 +52,14 @@ export default function ChiTietDatPhong() {
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchBookingAndStatuses();
+    return () => {
+      isMounted = false;
+    };
   }, [id, user]);
 
   const getStatusDisplay = (statusId) => {

@@ -20,49 +20,49 @@ export default function QuanLyDatPhong() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchConfigsAndData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        };
+
+        const [resConfig, resData, resSettings] = await Promise.all([
+          fetch("http://localhost:8000/api/admin/booking-statuses", { headers }),
+          fetch("http://localhost:8000/api/admin/dat-phong", { headers }),
+          fetch("http://localhost:8000/api/settings")
+        ]);
+
+        if (resConfig.ok) {
+          const configs = await resConfig.json();
+          setStatusConfigs(configs);
+          if (configs.length > 0) {
+            setActiveStatus(configs[0].id);
+          }
+        }
+        
+        if (resData.ok) {
+          setDatPhongs(await resData.json());
+        } else {
+          showToast("Lỗi khi lấy danh sách đơn đặt phòng", "error");
+        }
+
+        if (resSettings.ok) {
+          const sData = await resSettings.json();
+          if (sData.deposit_percentage !== undefined) {
+            setDepositPercentage(Number(sData.deposit_percentage));
+          }
+        }
+      } catch {
+        showToast("Không thể kết nối đến máy chủ", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchConfigsAndData();
-  }, []);
-
-  const fetchConfigsAndData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const headers = {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/json"
-      };
-
-      const [resConfig, resData, resSettings] = await Promise.all([
-        fetch("http://localhost:8000/api/admin/booking-statuses", { headers }),
-        fetch("http://localhost:8000/api/admin/dat-phong", { headers }),
-        fetch("http://localhost:8000/api/settings")
-      ]);
-
-      if (resConfig.ok) {
-        const configs = await resConfig.json();
-        setStatusConfigs(configs);
-        if (configs.length > 0) {
-          setActiveStatus(configs[0].id);
-        }
-      }
-      
-      if (resData.ok) {
-        setDatPhongs(await resData.json());
-      } else {
-        showToast("Lỗi khi lấy danh sách đơn đặt phòng", "error");
-      }
-
-      if (resSettings.ok) {
-        const sData = await resSettings.json();
-        if (sData.deposit_percentage !== undefined) {
-          setDepositPercentage(Number(sData.deposit_percentage));
-        }
-      }
-    } catch (e) {
-      showToast("Không thể kết nối đến máy chủ", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [showToast]);
 
   const fetchDatPhongs = async () => {
     try {
@@ -77,7 +77,7 @@ export default function QuanLyDatPhong() {
         const data = await res.json();
         setDatPhongs(data);
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   };
@@ -101,7 +101,7 @@ export default function QuanLyDatPhong() {
         } else {
           showToast("Có lỗi xảy ra khi cập nhật", "error");
         }
-      } catch (e) {
+      } catch {
         showToast("Lỗi kết nối đến máy chủ", "error");
       }
     });
@@ -135,7 +135,7 @@ export default function QuanLyDatPhong() {
         } else {
           showToast("Lỗi cập nhật", "error");
         }
-      } catch (e) {
+      } catch {
         showToast("Lỗi kết nối", "error");
       }
     });

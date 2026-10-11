@@ -27,10 +27,14 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleOpenChat = () => {
+    setIsOpen(true);
+    setUnreadBadge(false);
+  };
+
   useEffect(() => {
     if (isOpen) {
       scrollToBottom();
-      setUnreadBadge(false);
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [isOpen, messages]);
@@ -124,22 +128,26 @@ export default function ChatWidget() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        const successMsg = {
-          id: Date.now(),
-          sender: "bot",
-          text: `🎉 **CHÚC MỪNG ANH/CHỊ ĐÃ ĐẶT PHÒNG THÀNH CÔNG!**\n\nEm đã lưu đơn đặt phòng của mình vào hệ thống của Royal Hotel & Resort rồi ạ.\nBộ phận lễ tân sẽ sớm liên hệ hotline hoặc Zalo để hướng dẫn nhận phòng chu đáo nhất cho anh/chị nhé!`,
-          booking_created: data.booking,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-        setMessages((prev) => [...prev, successMsg]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            sender: "bot",
+            text: `🎉 **CHÚC MỪNG ANH/CHỊ ĐÃ ĐẶT PHÒNG THÀNH CÔNG!**\n\nEm đã lưu đơn đặt phòng của mình vào hệ thống của Royal Hotel & Resort rồi ạ.\nBộ phận lễ tân sẽ sớm liên hệ hotline hoặc Zalo để hướng dẫn nhận phòng chu đáo nhất cho anh/chị nhé!`,
+            booking_created: data.booking,
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
       } else {
-        const failMsg = {
-          id: Date.now(),
-          sender: "bot",
-          text: `Dạ rất tiếc: ${data.message || "Không thể tạo đơn lúc này."} Anh/chị vui lòng thử chọn ngày khác hoặc liên hệ hotline 1900 6868 giúp em nhé ạ!`,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-        setMessages((prev) => [...prev, failMsg]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            sender: "bot",
+            text: `Dạ rất tiếc: ${data.message || "Không thể tạo đơn lúc này."} Anh/chị vui lòng thử chọn ngày khác hoặc liên hệ hotline 1900 6868 giúp em nhé ạ!`,
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
       }
     } catch (err) {
       console.error(err);
@@ -204,7 +212,7 @@ export default function ChatWidget() {
           )}
 
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={handleOpenChat}
             className="flex items-center gap-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer"
             aria-label="Tư vấn và đặt phòng"
           >
