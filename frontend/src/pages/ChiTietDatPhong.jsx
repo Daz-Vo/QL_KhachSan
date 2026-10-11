@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDateTime } from "../utils/dateHelper";
 import { useSearchParams, Link } from "react-router-dom";
 import { useUI } from "../contexts/UIContext";
 
@@ -66,9 +67,7 @@ export default function ChiTietDatPhong() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN') + " " + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return formatDateTime(dateString);
   };
 
   if (loading) {
